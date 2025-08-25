@@ -18,10 +18,11 @@ if ! command -v yay &>/dev/null; then
   fi
 fi
 
+# install packages
 if command -v yay &>/dev/null; then
   echo ">> Installing system components..."
   sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl
-  yay -S --noconfirm --needed 1password docker-desktop ghostty-git visual-studio-code-bin fastfetch nvim
+  yay -S --noconfirm --needed 1password docker-desktop ghostty-git visual-studio-code-bin fastfetch nvim ripgrep
   yay -S --noconfirm --needed --repo rofi-wayland waybar-git
   echo ">> Installed system components..."
 fi
