@@ -1,0 +1,87 @@
+#!/bin/bash
+set -e
+
+GO_TARBALL_URL=$(curl -s https://go.dev/dl/ | grep -oP 'https://go.dev/dl/go[0-9.]+.linux-amd64.tar.gz' | head -n 1)
+
+if ! command -v yay &>/dev/null; then
+  echo ">> Installing Yay..."
+  sudo pacman -S --needed --noconfirm base-devel git
+  cd /tmp
+  git clone https://aur.archlinux.org/yay.git
+  cd yay
+  makepkg -si --noconfirm
+  cd ~
+  if ! command yay &>/dev/null; then
+    echo ">> Failed to install Yay!"
+  else
+    echo ">> Yay installed!"
+  fi
+fi
+
+if command -v yay &>/dev/null; then
+  echo ">> Installing system components..."
+  sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl
+  yay -S --noconfirm --needed 1password docker-desktop ghostty-git visual-studio-code-bin fastfetch nvim
+  yay -S --noconfirm --needed --repo rofi-wayland waybar-git
+  echo ">> Installed system components..."
+fi
+
+if ! command -v zsh &>/dev/null; then
+  yay -S --noconfirm --needed zsh
+  export RUNZSH=no
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+if ! command -v flatpak &>/dev/null; then
+  yay -S --noconfirm --needed flatpak
+else
+  flatpak install -y flathub app.zen_browser.zen
+fi
+
+if ! yay -Qs linux-bazzite-bin &>/dev/null; then
+  echo ">> Installing the bazzite kernel..."
+  yay -Syu --noconfirm --needed linux-bazzite-bin
+  sudo cp /etc/default/grub /etc/default/grub.bak
+  sudo sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/' /etc/default/grub
+  if ! grep -q '^GRUB_SAVEDEFAULT=' /etc/default/grub; then
+    echo 'GRUB_SAVEDEFAULT=true' | sudo tee -a /etc/default/grub
+  else
+    sudo sed -i 's/^GRUB_SAVEDEFAULT=.*/GRUB_SAVEDEFAULT=true/' /etc/default/grub
+  fi
+
+  sudo grub-mkconfig -o /boot/grub/grub.cfg
+  echo ">> Installed the bazzite kernel..."
+fi
+
+if ! command -v cargo &>/dev/null; then
+  echo ">> Installing Rust..."
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  if ! command -v cargo &>/dev/null; then
+    echo ">> Failed to install Rust!"
+  else
+    echo ">> Installed Rust!"
+  fi
+fi
+
+if ! command -v go &>/dev/null; then
+  echo ">> Installing Go..."
+  curl -LO "$GO_TARBALL_URL"
+  sudo rm -rf /usr/local/go
+  sudo tar -C /usr/local -xzf $(basename $GO_TARBALL_URL)
+  export PATH=$PATH:/usr/local/go/bin
+  if ! command -v go &>/dev/null; then
+    echo ">> Failed to install Go!"
+  else
+    echo ">> Installed Go!"
+  fi
+fi
+
+echo ">> Installing fonts"
+yay -S --needed --noconfirm ttf-jetbrains-mono-nerd-font ttf-caskaydia-cove-nerd-font nerd-fonts-symbols
+fc-cache -f -v
+echo ">> Installed fonts"
+
+read -p "Install finished. Reboot now? (y/N): " answer
+if [["$answer" =~ ^[Yy]$ ]]; then
+  sudo reboot
+fi
