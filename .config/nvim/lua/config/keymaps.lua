@@ -14,10 +14,8 @@ keymap('n', '<leader>fb', ":Telescope live_grep<cr>")
 keymap("n", "<leader>u", "<cmd>Telescope undo<cr>")
 
 -- Oil
--- keymap("n", "<S-j>", ":Oil<cr>", { desc = "Open parent directory" })
+keymap("n", "<S-j>", ":Oil<cr>", { desc = "Open parent directory" })
 
--- Pretty hover
--- keymap("n", "<leader>h", "<cmd>lua require('pretty_hover').hover()<CR>", { noremap = true, silent = true })
+-- Themery 
+keymap("n", "<leader>t", ":Themery<CR>", { desc = "Open Themery Theme Picker" })
 
--- Noice
--- keymap("n", "<leader>d", ":NoiceDismiss<cr>", { desc = "Dismiss noice message" })

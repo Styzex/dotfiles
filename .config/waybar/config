@@ -3,7 +3,7 @@
   "position": "bottom",
   "modules-left": ["hyprland/workspaces"],
   "modules-center": ["clock"],
-  "modules-right": ["battery", "hyprland/language", "pulseaudio","tray"],
+  "modules-right": ["battery", "hyprland/language", "pulseaudio", "bluetooth", "tray"],
 
   // -------------------------------------------------------------------------
   // Modules
@@ -59,6 +59,10 @@
     "format": "{icons}",
     "icon-size": 20,
     "spacing": 4
+  },
+  "bluetooth": {
+    "on-click": "~/.config/waybar/scripts/rofi-bluetooth &",
+    "format": " {status}",
   },
 
   "custom/separator": {

@@ -1,5 +1,4 @@
 export ZSH="$HOME/.oh-my-zsh"
-export TERM="screen"
 
 ZSH_THEME="robbyrussell"
 
