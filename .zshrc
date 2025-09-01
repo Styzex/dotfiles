@@ -1,8 +1,10 @@
 export ZSH="$HOME/.oh-my-zsh"
+export PATH=$PATH:/home/viktor/go/bin
+export PATH=/home/viktor/.nimble/bin:$PATH
 
 ZSH_THEME="robbyrussell"
 
-plugins=(git golang tmux zoxide)
+plugins=(git golang tmux zoxide zsh-autosuggestions zsh-syntax-highlighting)
 
 ZOXIDE_CMD_OVERRIDE="cd"
 
