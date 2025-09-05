@@ -1,6 +1,7 @@
 local keymap = vim.keymap.set
+local harpoon = require("harpoon")
 local telescope = require("telescope")
-local harpoon_mark = require("harpoon.mark")
+-- local harpoon = require('harpoon')
 table.unpack = table.unpack
 
 -- Shortcuts
@@ -22,10 +23,13 @@ keymap("n", "<S-j>", ":Telescope file_browser<CR>")
 keymap("n", "<leader>t", ":Themery<CR>", { desc = "Open Themery Theme Picker" })
 
 -- Harpoon
-keymap("n", "<leader>h", function()
-  telescope.extensions.harpoon.marks()
-end)
+-- keymap("n", "<leader>h", function()
+--   telescope.extensions.harpoon.marks()
+-- end)
 
-vim.keymap.set("n", "<leader>m", function()
-  harpoon_mark.add_file()
-end)
+keymap("n", "<leader>m", function() harpoon:list():add() end)
+keymap("n", "<leader>h", HarpoonTelescopeToggle, { desc = "Open Harpoon Telescope window" })
+
+-- vim.keymap.set("n", "<leader>m", function()
+--   harpoon_mark.add_file()
+-- end)

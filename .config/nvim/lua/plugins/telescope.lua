@@ -5,7 +5,6 @@ return {
       "debugloop/telescope-undo.nvim",
       "nvim-telescope/telescope-file-browser.nvim",
       "nvim-tree/nvim-web-devicons",
-      "ThePrimeagen/harpoon"
     },
     config = function()
         require("telescope").setup({

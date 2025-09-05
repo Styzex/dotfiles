@@ -24,6 +24,7 @@ if command -v yay &>/dev/null; then
   sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl
   yay -S --noconfirm --needed 1password docker-desktop ghostty-git fastfetch nvim ripgrep tmux zoxide fzf blueman pavucontrol
   yay -S --noconfirm --needed --repo rofi-wayland waybar-git
+  sudo pacman -S --noconfirm --needed swww
   echo ">> Installed system components..."
 fi
 
