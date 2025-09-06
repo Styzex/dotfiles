@@ -27,9 +27,6 @@ return {
         }
 
         vim.keymap.set("n", "K", require("hover").hover, {desc = "hover.nvim"})
-
-        -- Mouse support
-        vim.keymap.set('n', '<MouseMove>', require('hover').hover_mouse, { desc = "hover.nvim (mouse)" })
         vim.o.mousemoveevent = true
     end
 }

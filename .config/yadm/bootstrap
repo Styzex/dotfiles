@@ -3,6 +3,9 @@ set -e
 
 GO_TARBALL_URL=$(curl -s https://go.dev/dl/ | grep -oP 'https://go.dev/dl/go[0-9.]+.linux-amd64.tar.gz' | head -n 1)
 
+OMTM_CONF="$HOME/.config/.oh-my-tmux/.tmux.conf"
+LOCAL_LINE="source -q ~/.tmux.conf.local"
+
 if ! command -v yay &>/dev/null; then
   echo ">> Installing Yay..."
   sudo pacman -S --needed --noconfirm base-devel git
@@ -22,7 +25,7 @@ fi
 if command -v yay &>/dev/null; then
   echo ">> Installing system components..."
   sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl
-  yay -S --noconfirm --needed 1password docker-desktop ghostty-git fastfetch nvim ripgrep tmux zoxide fzf blueman pavucontrol
+  yay -S --noconfirm --needed 1password docker-desktop ghostty-git fastfetch nvim ripgrep zoxide fzf blueman pavucontrol obsidian
   yay -S --noconfirm --needed --repo rofi-wayland waybar-git
   sudo pacman -S --noconfirm --needed swww
   echo ">> Installed system components..."
@@ -38,6 +41,13 @@ if ! command -v zsh &>/dev/null; then
   yay -S --noconfirm --needed zsh
   export RUNZSH=no
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+if ! command -v tmux &>/dev/null; then
+  yay -S --noconfirm --needed tmux
+  curl -fsSL "https://github.com/gpakosz/.tmux/raw/refs/heads/master/install.sh#$(date +%s)" | bash
+  grep -Fxq "$LOCAL_LINE" "$OMTM_CONF" || echo "$LOCAL_LINE" >> "$OMTM_CONF"
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
 
 if ! command -v flatpak &>/dev/null; then
