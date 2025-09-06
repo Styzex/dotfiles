@@ -14,6 +14,7 @@ source $ZSH/oh-my-zsh.sh
 
 if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
   tmux attach-session -t default || tmux new-session -s default
+  tmux source ~/.tmux.conf
 fi
 
 export NVM_DIR="$HOME/.nvm"
