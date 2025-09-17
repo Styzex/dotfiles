@@ -24,7 +24,7 @@ fi
 # install packages
 if command -v yay &>/dev/null; then
   echo ">> Installing system components..."
-  sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl
+  sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl unzip
   yay -S --noconfirm --needed 1password docker-desktop ghostty-git fastfetch nvim ripgrep zoxide fzf blueman pavucontrol obsidian
   yay -S --noconfirm --needed --repo rofi-wayland waybar-git
   sudo pacman -S --noconfirm --needed swww
@@ -92,6 +92,24 @@ if ! command -v go &>/dev/null; then
   else
     echo ">> Installed Go!"
   fi
+fi
+
+if ! command -v nvm &>/dev/null; then
+  echo ">> Installing FNM (Fast Node Manager)..."
+  curl -fsSL https://fnm.vercel.app/install | bash
+  export PATH="$HOME/.fnm:$PATH"
+  eval "$(fnm env)"
+  fnm install --lts
+  fnm use --lts
+  echo ">> Installed FNM + Node (LTS)"
+fi
+
+if ! command -v bun &>/dev/null; then
+  echo ">> Installing Bun..."
+  curl -fsSL https://bun.sh/install | bash
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH=$BUN_INSTALL/bin:$PATH
+  echo ">> Installed Bun"
 fi
 
 echo ">> Installing fonts"
