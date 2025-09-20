@@ -11,7 +11,6 @@ return {
       automatic_installation = true,
     },
     config = function(_, opts)
-      local lspconfig = require('lspconfig')
       local blink_cmp = require('blink.cmp')
 
       local capabilities = blink_cmp.get_lsp_capabilities()
@@ -21,22 +20,13 @@ return {
       }
 
       for _, server in ipairs(opts.ensure_installed) do
-        lspconfig[server].setup({
+        vim.lsp.config(server, {
           capabilities = capabilities,
         })
       end
 
-      vim.diagnostic.config({
-        virtual_text = {
-          prefix = '■',
-          spacing = 2,
-        },
-        underline = true,
-        update_in_insert = false,
-        severity_sort = true,
-      })
-
-      require("lspconfig").lua_ls.setup {
+      vim.lsp.config('lua_ls', {
+        capabilities = capabilities,
         settings = {
           Lua = {
             runtime = {
@@ -52,7 +42,20 @@ return {
             telemetry = { enable = false },
           },
         },
-      }
+      })
+
+      vim.lsp.enable(opts.ensure_installed)
+
+      vim.diagnostic.config({
+        virtual_text = {
+          prefix = '■',
+          spacing = 2,
+        },
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+      })
+
     end
   },
 }

@@ -1,9 +1,10 @@
 {
   "layer": "top",
   "position": "bottom",
-  "modules-left": ["hyprland/workspaces"],
+  "modules-left": ["hyprland/workspaces", "custom/separator", "hyprland/window"],
   "modules-center": ["clock"],
-  "modules-right": ["battery", "hyprland/language", "pulseaudio", "bluetooth", "tray"],
+  // "modules-right": ["battery", "hyprland/language", "pulseaudio", "bluetooth", "tray"],
+  "modules-right": ["network", "cpu", "memory", "battery", "hyprland/language", "pulseaudio", "bluetooth", "tray"],
 
   // -------------------------------------------------------------------------
   // Modules
@@ -63,6 +64,20 @@
   "bluetooth": {
     "on-click": "~/.config/waybar/scripts/rofi-bluetooth &",
     "format": " {status}",
+  },
+  "network": {
+    "format-wifi": "󰖩 {essid}",
+    "format-ethernet": "󰈀 {ipaddr}",
+    "format-disconnected": "󰤭",
+    "tooltip-format": "{ifname} via {gwaddr}\n{ipaddr}/{cidr}"
+  },
+  "cpu": {
+    "format": "󰻠 {usage}%",
+    "tooltip": true
+  },
+  "memory": {
+    "format": "󰍛 {used:0.1f}G",
+    "tooltip": true
   },
 
   "custom/separator": {

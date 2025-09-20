@@ -34,3 +34,6 @@ fi
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# QEMU aliases
+alias qemu='qemu-system-x86_64 -fda'
