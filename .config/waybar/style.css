@@ -1,15 +1,4 @@
 * {
-  /* Gruvbox
-  bg: #282828;
-  fg: #ebdbb2;
-  accent: #8ec07c;
-  
-  TokyoNight colors for reference
-  bg: #1a1b26;
-  fg: #c0caf5;
-  accent: #7aa2f7;
-  */
-
   font-family: "CaskaydiaCove Nerd Font";
   font-size: 18px;
   font-weight: bold;
@@ -33,14 +22,14 @@ tooltip {
 
 #workspaces {
   background: #000000;
-  color: #ffffff;
+  color: #bbbbbb;
   border: none;
   padding: 0 4px;
 }
 
 #workspaces button {
   background: #000000;
-  color: #ffffff;
+  color: #bbbbbb;
   border: none;
   padding: 0 6px;
   margin: 0;
@@ -48,8 +37,13 @@ tooltip {
 }
 
 #workspaces button.active {
-  background: #ffffff; /* Accent */
-  color: #000000;
+  background: #285577;
+  color: #ffffff;
+}
+
+#workspaces button.urgent {
+  background: #900000;
+  color: #ffffff;
 }
 
 #tray {
@@ -88,11 +82,12 @@ tooltip {
   min-height: 10px;
   min-width: 80px;
   border-radius: 5px;
-  background-color: #000000;
+  background-color: #333333;
 }
 
 #pulseaudio-slider highlight {
   min-width: 10px;
   border-radius: 5px;
-  background-color: #ffffff;
+  background-color: #285577;
 }
+
