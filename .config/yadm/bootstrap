@@ -1,123 +1,112 @@
 #!/bin/bash
 set -e
 
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  DISTRO="$ID"
+else
+  echo ">> Cannot detect distribution!"
+  exit 1
+fi
+
+echo ">> Detected distro: $DISTRO"
+
 GO_TARBALL_URL=$(curl -s https://go.dev/dl/ | grep -oP 'https://go.dev/dl/go[0-9.]+.linux-amd64.tar.gz' | head -n 1)
 
 OMTM_CONF="$HOME/.config/.oh-my-tmux/.tmux.conf"
 LOCAL_LINE="source -q ~/.tmux.conf.local"
 
-if ! command -v yay &>/dev/null; then
-  echo ">> Installing Yay..."
-  sudo pacman -S --needed --noconfirm base-devel git
-  cd /tmp
-  git clone https://aur.archlinux.org/yay.git
-  cd yay
-  makepkg -si --noconfirm
-  cd ~
-  if ! command yay &>/dev/null; then
-    echo ">> Failed to install Yay!"
-  else
-    echo ">> Yay installed!"
-  fi
-fi
+if [[ "$DISTRO" == "arch" ]]; then
+    if ! command -v yay &>/dev/null; then
+        echo ">> Installing Yay..."
+        sudo pacman -S --needed --noconfirm base-devel git
+        cd /tmp
+        git clone https://aur.archlinux.org/yay.git
+        cd yay
+        makepkg -si --noconfirm
+        cd ~
+        if ! command yay &>/dev/null; then
+            echo ">> Failed to install Yay!"
+        else
+            echo ">> Yay installed!"
+        fi
+    fi
 
-# install packages
-if command -v yay &>/dev/null; then
-  echo ">> Installing system components..."
-  sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl unzip
-  yay -S --noconfirm --needed 1password docker-desktop ghostty-git fastfetch nvim ripgrep zoxide fzf blueman pavucontrol obsidian
-  yay -S --noconfirm --needed --repo rofi-wayland waybar-git
-  sudo pacman -S --noconfirm --needed swww
-  echo ">> Installed system components..."
-fi
+    # install packages
+    if command -v yay &>/dev/null; then
+        echo ">> Installing system components..."
+        sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl unzip
+        yay -S --noconfirm --needed 1password blueman pavucontrol obsidian
+        yay -S --noconfirm --needed --repo rofi-wayland waybar-git
+        sudo pacman -S --noconfirm --needed swww
+        echo ">> Installed system components..."
+    fi
 
-if command -v pulseaudio &>/dev/null; then
-  echo ">> Installing pulseaudio-bluetooth"
-  yay -S --noconfirm --needed pulseaudio-bluetooth
-  echo ">> Installed pulseaudio-bluetooth"
-fi
+    if command -v yay &>/dev/null; then
+        sudo bash "$HOME/.local/bin/dev_arch.sh"
+    fi
 
-if ! command -v zsh &>/dev/null; then
-  yay -S --noconfirm --needed zsh
-  export RUNZSH=no
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
+    if command -v pulseaudio &>/dev/null; then
+        echo ">> Installing pulseaudio-bluetooth"
+        yay -S --noconfirm --needed pulseaudio-bluetooth
+        echo ">> Installed pulseaudio-bluetooth"
+    fi
 
-if ! command -v tmux &>/dev/null; then
-  yay -S --noconfirm --needed tmux
-  curl -fsSL "https://github.com/gpakosz/.tmux/raw/refs/heads/master/install.sh#$(date +%s)" | bash
-  grep -Fxq "$LOCAL_LINE" "$OMTM_CONF" || echo "$LOCAL_LINE" >> "$OMTM_CONF"
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-fi
+    if ! command -v flatpak &>/dev/null; then
+        yay -S --noconfirm --needed flatpak
+    fi
+    flatpak install -y flathub app.zen_browser.zen
 
-if ! command -v flatpak &>/dev/null; then
-  yay -S --noconfirm --needed flatpak
+    if ! yay -Qs linux-bazzite-bin &>/dev/null; then
+        echo ">> Installing the bazzite kernel..."
+        yay -Syu --noconfirm --needed linux-bazzite-bin
+        sudo cp /etc/default/grub /etc/default/grub.bak
+        sudo sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/' /etc/default/grub
+        if ! grep -q '^GRUB_SAVEDEFAULT=' /etc/default/grub; then
+            echo 'GRUB_SAVEDEFAULT=true' | sudo tee -a /etc/default/grub
+        else
+            sudo sed -i 's/^GRUB_SAVEDEFAULT=.*/GRUB_SAVEDEFAULT=true/' /etc/default/grub
+        fi
+
+        sudo grub-mkconfig -o /boot/grub/grub.cfg
+        echo ">> Installed the bazzite kernel..."
+    fi
+elif [[ "$DISTRO" == "ubuntu" ]]; then
+    echo ">> Installing system components..."
+    sudo apt update && sudo apt upgrade -y
+    sudo apt install -y ca-certificates openssl git curl unzip
+
+    # 1Password
+    if ! command -v 1password &>/dev/null; then
+        echo ">> Installing 1Password..."
+        curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor -o /usr/share/keyrings/1password-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$(dpkg --print-architecture) stable main" | sudo tee /etc/apt/sources.list.d/1password.list
+        sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
+        curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
+        sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
+        curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor -o /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+        sudo apt update && sudo apt install -y 1password
+    fi
+
+    # Obsidian
+    if ! command -v obsidian &>/dev/null; then
+        echo ">> Installing Obsidian..."
+        OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | grep -oP '"browser_download_url": "\K[^"]+_amd64\.deb')
+        curl -fLo /tmp/obsidian.deb "$OBSIDIAN_URL"
+        sudo apt install -y /tmp/obsidian.deb
+        rm /tmp/obsidian.deb
+    fi
+
+    echo ">> Installed system components..."
+
+    # Run dev script
+    bash "$HOME/.local/bin/dev_ubuntu.sh"
 else
-  flatpak install -y flathub app.zen_browser.zen
+  echo ">> Unsupported distribution: $DISTRO"
+  exit 1
 fi
-
-if ! yay -Qs linux-bazzite-bin &>/dev/null; then
-  echo ">> Installing the bazzite kernel..."
-  yay -Syu --noconfirm --needed linux-bazzite-bin
-  sudo cp /etc/default/grub /etc/default/grub.bak
-  sudo sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/' /etc/default/grub
-  if ! grep -q '^GRUB_SAVEDEFAULT=' /etc/default/grub; then
-    echo 'GRUB_SAVEDEFAULT=true' | sudo tee -a /etc/default/grub
-  else
-    sudo sed -i 's/^GRUB_SAVEDEFAULT=.*/GRUB_SAVEDEFAULT=true/' /etc/default/grub
-  fi
-
-  sudo grub-mkconfig -o /boot/grub/grub.cfg
-  echo ">> Installed the bazzite kernel..."
-fi
-
-if ! command -v cargo &>/dev/null; then
-  echo ">> Installing Rust..."
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  if ! command -v cargo &>/dev/null; then
-    echo ">> Failed to install Rust!"
-  else
-    echo ">> Installed Rust!"
-  fi
-fi
-
-if ! command -v go &>/dev/null; then
-  echo ">> Installing Go..."
-  curl -LO "$GO_TARBALL_URL"
-  sudo rm -rf /usr/local/go
-  sudo tar -C /usr/local -xzf $(basename $GO_TARBALL_URL)
-  export PATH=$PATH:/usr/local/go/bin
-  if ! command -v go &>/dev/null; then
-    echo ">> Failed to install Go!"
-  else
-    echo ">> Installed Go!"
-  fi
-fi
-
-if ! command -v nvm &>/dev/null; then
-  echo ">> Installing FNM (Fast Node Manager)..."
-  curl -fsSL https://fnm.vercel.app/install | bash
-  export PATH="$HOME/.fnm:$PATH"
-  eval "$(fnm env)"
-  fnm install --lts
-  fnm use --lts
-  echo ">> Installed FNM + Node (LTS)"
-fi
-
-if ! command -v bun &>/dev/null; then
-  echo ">> Installing Bun..."
-  curl -fsSL https://bun.sh/install | bash
-  export BUN_INSTALL="$HOME/.bun"
-  export PATH=$BUN_INSTALL/bin:$PATH
-  echo ">> Installed Bun"
-fi
-
-echo ">> Installing fonts"
-yay -S --needed --noconfirm ttf-jetbrains-mono-nerd ttf-cascadia-code-nerd ttf-nerd-fonts-symbols
-fc-cache -f -v
-echo ">> Installed fonts"
 
 read -p "Install finished. Reboot now? (y/N): " answer
-if [["$answer" =~ ^[Yy]$ ]]; then
+if [[ "$answer" =~ ^[Yy]$ ]]; then
   sudo reboot
 fi
