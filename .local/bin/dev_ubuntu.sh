@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-
-GO_TARBALL_URL=$(curl -s https://go.dev/dl/ | grep -oP 'https://go.dev/dl/go[0-9.]+.linux-amd64.tar.gz' | head -n 1)
-
 OMTM_CONF="$HOME/.config/.oh-my-tmux/.tmux.conf"
 LOCAL_LINE="source -q ~/.tmux.conf.local"
 
@@ -11,30 +8,10 @@ echo ">> Installing dev components..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y ca-certificates openssl git curl unzip ripgrep zoxide fzf
 
-# Ghostty (build from source - requires Zig)
-if ! command -v ghostty &>/dev/null; then
-  echo ">> Installing Ghostty..."
-  if ! command -v zig &>/dev/null; then
-    echo ">> Installing Zig first..."
-    sudo snap install zig --classic --beta
-  fi
-  sudo apt install -y libgtk-4-dev libadwaita-1-dev
-  git clone https://github.com/ghostty-org/ghostty.git /tmp/ghostty
-  cd /tmp/ghostty
-  zig build -Doptimize=ReleaseFast
-  sudo cp zig-out/bin/ghostty /usr/local/bin/
-  cd ~
-  echo ">> Installed Ghostty"
-fi
-
 # Neovim (latest stable from GitHub releases)
 if ! command -v nvim &>/dev/null; then
   echo ">> Installing Neovim..."
-  curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
-  sudo rm -rf /opt/nvim
-  sudo tar -C /opt -xzf nvim-linux64.tar.gz
-  sudo ln -sf /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim
-  rm nvim-linux64.tar.gz
+  sudo apt install -y neovim
   echo ">> Installed Neovim"
 fi
 
@@ -49,7 +26,7 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-# Tmux + Oh My Tmux + TPM # Oh My tmux just quits the script after installing
+# Tmux + Oh My Tmux + TPM # Exits the script after Oh My Tmux installs
 if ! command -v tmux &>/dev/null; then
   sudo apt install -y tmux
 fi
@@ -71,13 +48,10 @@ if ! command -v cargo &>/dev/null; then
   fi
 fi
 
-# Go
+# Go # Doesn't work well has issues with some url
 if ! command -v go &>/dev/null; then
   echo ">> Installing Go..."
-  curl -LO "$GO_TARBALL_URL"
-  sudo rm -rf /usr/local/go
-  sudo tar -C /usr/local -xzf "$(basename "$GO_TARBALL_URL")"
-  rm "$(basename "$GO_TARBALL_URL")"
+  sudo apt install golang-go
   export PATH=$PATH:/usr/local/go/bin
   if command -v go &>/dev/null; then
     echo ">> Installed Go!"
@@ -105,6 +79,9 @@ if ! command -v bun &>/dev/null; then
   export PATH="$BUN_INSTALL/bin:$PATH"
   echo ">> Installed Bun"
 fi
+
+# Zed
+curl -f https://zed.dev/install.sh | sh
 
 # Nerd Fonts
 echo ">> Installing fonts..."

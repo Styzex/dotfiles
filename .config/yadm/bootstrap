@@ -41,6 +41,10 @@ if [[ "$DISTRO" == "arch" ]]; then
         sudo pacman -S --noconfirm --needed swww
         echo ">> Installed system components..."
     fi
+    
+    git config --global user.email "viktor.paraj@gmail.com"
+    git config --global user.name "Viktor Paraj"
+
 
     if command -v yay &>/dev/null; then
         sudo bash "$HOME/.local/bin/dev_arch.sh"

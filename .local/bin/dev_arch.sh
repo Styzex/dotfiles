@@ -1,11 +1,6 @@
 #!/bin/bash
 set -e
 
-GO_TARBALL_URL=$(curl -s https://go.dev/dl/ | grep -oP 'https://go.dev/dl/go[0-9.]+.linux-amd64.tar.gz' | head -n 1)
-
-OMTM_CONF="$HOME/.config/.oh-my-tmux/.tmux.conf"
-LOCAL_LINE="source -q ~/.tmux.conf.local"
-
 if command -v yay &>/dev/null; then
   echo ">> Installing dev components..."
   sudo pacman -Syu --noconfirm --needed ca-certificates openssl git curl unzip
