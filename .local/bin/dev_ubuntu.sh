@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-GO_TARBALL_URL=$(curl -s https://go.dev/dl/ | grep -oP 'https://go.dev/dl/go[0-9.]+\.linux-amd64\.tar\.gz' | head -n 1)
+
+GO_TARBALL_URL=$(curl -s https://go.dev/dl/ | grep -oP 'https://go.dev/dl/go[0-9.]+.linux-amd64.tar.gz' | head -n 1)
 
 OMTM_CONF="$HOME/.config/.oh-my-tmux/.tmux.conf"
 LOCAL_LINE="source -q ~/.tmux.conf.local"
@@ -9,16 +10,6 @@ LOCAL_LINE="source -q ~/.tmux.conf.local"
 echo ">> Installing dev components..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y ca-certificates openssl git curl unzip ripgrep zoxide fzf
-
-# Docker Desktop
-if ! command -v docker &>/dev/null; then
-  echo ">> Installing Docker Desktop..."
-  curl -fLo /tmp/docker-desktop.deb "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb"
-  sudo apt install -y /tmp/docker-desktop.deb
-  rm /tmp/docker-desktop.deb
-  sudo usermod -aG docker "$USER"
-  echo ">> Installed Docker Desktop (log out and back in for group changes)"
-fi
 
 # Ghostty (build from source - requires Zig)
 if ! command -v ghostty &>/dev/null; then
@@ -58,12 +49,12 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-# Tmux + Oh My Tmux + TPM
+# Tmux + Oh My Tmux + TPM # Oh My tmux just quits the script after installing
 if ! command -v tmux &>/dev/null; then
   sudo apt install -y tmux
 fi
 if [ ! -d "$HOME/.tmux" ]; then
-  curl -fsSL "https://github.com/gpakosz/.tmux/raw/refs/heads/master/install.sh#$(date +%s)" | bash
+  (curl -fsSL "https://github.com/gpakosz/.tmux/raw/refs/heads/master/install.sh#$(date +%s)" | bash) || true
   grep -Fxq "$LOCAL_LINE" "$OMTM_CONF" 2>/dev/null || echo "$LOCAL_LINE" >> "$OMTM_CONF"
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
@@ -101,8 +92,8 @@ if ! command -v fnm &>/dev/null; then
   curl -fsSL https://fnm.vercel.app/install | bash
   export PATH="$HOME/.local/share/fnm:$PATH"
   eval "$(fnm env)"
-  fnm install --lts
-  fnm use --lts
+  fnm install 24
+  fnm use 24
   echo ">> Installed FNM + Node (LTS)"
 fi
 
